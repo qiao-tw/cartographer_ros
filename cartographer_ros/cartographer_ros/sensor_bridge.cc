@@ -19,6 +19,7 @@
 #include "absl/memory/memory.h"
 #include "cartographer_ros/msg_conversion.h"
 #include "cartographer_ros/time_conversion.h"
+#include "cartographer_ros/utm.h"
 
 namespace cartographer_ros {
 
@@ -166,6 +167,37 @@ void SensorBridge::HandlePointCloud2Message(
   carto::common::Time time;
   std::tie(point_cloud, time) = ToPointCloudWithIntensities(*msg);
   HandleRangefinder(sensor_id, time, msg->header.frame_id, point_cloud.points);
+}
+
+std::unique_ptr<::cartographer::sensor::FixedFramePoseData>
+SensorBridge::ToGpsData(
+    const sensor_msgs::NavSatFix::ConstPtr& msg) {
+  const carto::common::Time time = FromRos(msg->header.stamp);
+  const auto sensor_to_tracking = tf_bridge_.LookupToTracking(
+      time, CheckNoLeadingSlash(msg->header.frame_id));
+  if (sensor_to_tracking == nullptr) {
+    return nullptr;
+  }
+  double x, y;
+  ::gps_common::UTM(msg->latitude, msg->longitude, &x, &y);
+  ::cartographer::transform::Rigid3d utm_pose(
+        ::cartographer::transform::Rigid3d::Vector(x, y, msg->altitude),
+        ::cartographer::transform::Rigid3d::Quaternion());
+  return ::cartographer::common::make_unique<
+      ::cartographer::sensor::FixedFramePoseData>(
+      ::cartographer::sensor::FixedFramePoseData{
+          time, utm_pose * sensor_to_tracking->inverse()});
+}
+
+void SensorBridge::HandleGpsMessage(
+    const std::string& sensor_id,
+    const sensor_msgs::NavSatFix::ConstPtr& msg) {
+  std::unique_ptr<::cartographer::sensor::FixedFramePoseData> gps_data =
+      ToGpsData(msg);
+  if (gps_data != nullptr) {
+    trajectory_builder_->AddFixedFramePoseData(sensor_id, gps_data->time,
+                                               gps_data->pose);
+  }
 }
 
 const TfBridge& SensorBridge::tf_bridge() const { return tf_bridge_; }

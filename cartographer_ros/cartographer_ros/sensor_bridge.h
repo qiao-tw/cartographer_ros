@@ -23,6 +23,7 @@
 #include "cartographer/mapping/trajectory_builder_interface.h"
 #include "cartographer/sensor/imu_data.h"
 #include "cartographer/sensor/odometry_data.h"
+#include "cartographer/sensor/fixed_frame_pose_data.h"
 #include "cartographer/transform/rigid_transform.h"
 #include "cartographer/transform/transform.h"
 #include "cartographer_ros/tf_bridge.h"
@@ -36,6 +37,7 @@
 #include "sensor_msgs/MultiEchoLaserScan.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "sensor_msgs/PointCloud2.h"
+#include "sensor_msgs/NavSatFix.h"
 
 namespace cartographer_ros {
 
@@ -71,6 +73,10 @@ class SensorBridge {
       const sensor_msgs::MultiEchoLaserScan::ConstPtr& msg);
   void HandlePointCloud2Message(const std::string& sensor_id,
                                 const sensor_msgs::PointCloud2::ConstPtr& msg);
+  std::unique_ptr<::cartographer::sensor::FixedFramePoseData> ToGpsData(
+      const sensor_msgs::NavSatFix::ConstPtr& msg);
+  void HandleGpsMessage(const std::string& sensor_id,
+                        const sensor_msgs::NavSatFix::ConstPtr& msg);
 
   const TfBridge& tf_bridge() const;
 

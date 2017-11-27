@@ -110,6 +110,8 @@ class Node {
       const sensor_msgs::MultiEchoLaserScan::ConstPtr& msg);
   void HandlePointCloud2Message(int trajectory_id, const std::string& sensor_id,
                                 const sensor_msgs::PointCloud2::ConstPtr& msg);
+  void HandleGpsMessage(int trajectory_id, const std::string& sensor_id,
+                        const sensor_msgs::NavSatFix::ConstPtr& msg);
 
   // Serializes the complete Node state.
   void SerializeState(const std::string& filename,
@@ -195,18 +197,21 @@ class Node {
                              const double odometry_sampling_ratio,
                              const double fixed_frame_pose_sampling_ratio,
                              const double imu_sampling_ratio,
-                             const double landmark_sampling_ratio)
+                             const double landmark_sampling_ratio,
+                             const double gps_sampling_ratio)
         : rangefinder_sampler(rangefinder_sampling_ratio),
           odometry_sampler(odometry_sampling_ratio),
           fixed_frame_pose_sampler(fixed_frame_pose_sampling_ratio),
           imu_sampler(imu_sampling_ratio),
-          landmark_sampler(landmark_sampling_ratio) {}
+          landmark_sampler(landmark_sampling_ratio),
+          gps_sampler(gps_sampling_ratio) {}
 
     ::cartographer::common::FixedRatioSampler rangefinder_sampler;
     ::cartographer::common::FixedRatioSampler odometry_sampler;
     ::cartographer::common::FixedRatioSampler fixed_frame_pose_sampler;
     ::cartographer::common::FixedRatioSampler imu_sampler;
     ::cartographer::common::FixedRatioSampler landmark_sampler;
+    ::cartographer::common::FixedRatioSampler gps_sampler;
   };
 
   // These are keyed with 'trajectory_id'.

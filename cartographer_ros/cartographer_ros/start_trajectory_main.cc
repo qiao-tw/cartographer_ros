@@ -83,6 +83,7 @@ bool Run() {
   srv.request.topics.imu_topic = node_handle.resolveName(kImuTopic, true);
   srv.request.topics.odometry_topic =
       node_handle.resolveName(kOdometryTopic, true);
+  srv.request.topics.gps_topic = node_handle.resolveName(kGpsTopic, true);
 
   if (!client.call(srv)) {
     LOG(ERROR) << "Failed to call " << kStartTrajectoryServiceName << ".";

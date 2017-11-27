@@ -326,7 +326,9 @@ void RunOfflineNode(const MapBuilderFactory& map_builder_factory) {
                                    msg.instantiate<nav_msgs::Odometry>());
       }
       if (msg.isType<sensor_msgs::NavSatFix>()) {
-        node.HandleNavSatFixMessage(trajectory_id, sensor_id,
+        // node.HandleNavSatFixMessage(trajectory_id, sensor_id,
+        //                             msg.instantiate<sensor_msgs::NavSatFix>());
+        node.HandleGpsMessage(trajectory_id, sensor_id,
                                     msg.instantiate<sensor_msgs::NavSatFix>());
       }
       if (msg.isType<cartographer_ros_msgs::LandmarkList>()) {

@@ -189,7 +189,7 @@ void Node::AddSensorSamplers(const int trajectory_id,
       std::forward_as_tuple(
           options.rangefinder_sampling_ratio, options.odometry_sampling_ratio,
           options.fixed_frame_pose_sampling_ratio, options.imu_sampling_ratio,
-          options.landmarks_sampling_ratio));
+          options.landmarks_sampling_ratio, options.gps_sampling_ratio));
 }
 
 void Node::PublishLocalTrajectoryData(const ::ros::TimerEvent& timer_event) {
@@ -435,6 +435,13 @@ void Node::LaunchSubscribers(const TrajectoryOptions& options,
     subscribers_[trajectory_id].push_back(
         {SubscribeWithHandler<cartographer_ros_msgs::LandmarkList>(
              &Node::HandleLandmarkMessage, trajectory_id, topic, &node_handle_,
+             this),
+         topic});
+  if (options.use_gps) {
+    std::string topic = topics.gps_topic;
+    subscribers_[trajectory_id].push_back(
+        {SubscribeWithHandler<sensor_msgs::NavSatFix>(
+             &Node::HandleGpsMessage, trajectory_id, topic, &node_handle_,
              this),
          topic});
   }
@@ -799,6 +806,17 @@ void Node::LoadState(const std::string& state_filename,
                      const bool load_frozen_state) {
   absl::MutexLock lock(&mutex_);
   map_builder_bridge_.LoadState(state_filename, load_frozen_state);
+}
+
+void Node::HandleGpsMessage(const int trajectory_id,
+                            const std::string& sensor_id,
+                            const sensor_msgs::NavSatFix::ConstPtr& msg) {
+  absl::MutexLocker lock(&mutex_);
+  if (!sensor_samplers_.at(trajectory_id).gps_sampler.Pulse()) {
+    return;
+  }
+  auto sensor_bridge_ptr = map_builder_bridge_.sensor_bridge(trajectory_id);
+  sensor_bridge_ptr->HandleGpsMessage(sensor_id, msg);
 }
 
 void Node::MaybeWarnAboutTopicMismatch(
