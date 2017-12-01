@@ -47,7 +47,9 @@ SensorBridge::SensorBridge(
     carto::mapping::TrajectoryBuilderInterface* const trajectory_builder)
     : num_subdivisions_per_laser_scan_(num_subdivisions_per_laser_scan),
       tf_bridge_(tracking_frame, lookup_transform_timeout_sec, tf_buffer),
-      trajectory_builder_(trajectory_builder) {}
+      trajectory_builder_(trajectory_builder) {
+  gps_origin_[0] = gps_origin_[1] = gps_origin_[2] = std::nan("");
+}
 
 std::unique_ptr<carto::sensor::OdometryData> SensorBridge::ToOdometryData(
     const nav_msgs::Odometry::ConstPtr& msg) {
@@ -173,20 +175,25 @@ std::unique_ptr<::cartographer::sensor::FixedFramePoseData>
 SensorBridge::ToGpsData(
     const sensor_msgs::NavSatFix::ConstPtr& msg) {
   const carto::common::Time time = FromRos(msg->header.stamp);
-  const auto sensor_to_tracking = tf_bridge_.LookupToTracking(
-      time, CheckNoLeadingSlash(msg->header.frame_id));
-  if (sensor_to_tracking == nullptr) {
-    return nullptr;
-  }
-  double x, y;
+  double x, y, z = msg->altitude;
   ::gps_common::UTM(msg->latitude, msg->longitude, &x, &y);
+  if (std::isnan(gps_origin_[0])) {
+    LOG(INFO) << "Setting GPS origin to " << x << "," << y << "," << z;
+    gps_origin_[0] = x;
+    gps_origin_[1] = y;
+    gps_origin_[2] = z;
+  }
+  x -= gps_origin_[0];
+  y -= gps_origin_[1];
+  //z -= gps_origin_[2];
+  z = 0;
   ::cartographer::transform::Rigid3d utm_pose(
-        ::cartographer::transform::Rigid3d::Vector(x, y, msg->altitude),
-        ::cartographer::transform::Rigid3d::Quaternion());
+        ::cartographer::transform::Rigid3d::Vector(x, y, z),
+        ::cartographer::transform::Rigid3d::Quaternion(0, 0, 0, 1));
   return ::cartographer::common::make_unique<
       ::cartographer::sensor::FixedFramePoseData>(
       ::cartographer::sensor::FixedFramePoseData{
-          time, utm_pose * sensor_to_tracking->inverse()});
+          time, utm_pose});
 }
 
 void SensorBridge::HandleGpsMessage(

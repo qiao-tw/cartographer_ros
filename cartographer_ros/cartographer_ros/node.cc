@@ -59,6 +59,7 @@ cartographer_ros_msgs::SensorTopics DefaultSensorTopics() {
   topics.odometry_topic = kOdometryTopic;
   topics.nav_sat_fix_topic = kNavSatFixTopic;
   topics.landmark_topic = kLandmarkTopic;
+  topics.gps_topic = kGpsTopic;
   return topics;
 }
 
@@ -349,6 +350,9 @@ Node::ComputeExpectedSensorIds(
   // Landmark is optional.
   if (options.use_landmarks) {
     expected_topics.insert(SensorId{SensorType::LANDMARK, kLandmarkTopic});
+  }
+  if (options.use_gps) {
+    expected_topics.insert(SsensorId{SensorType::FIXED_FRAME_POSE, topics.gps_topic});
   }
   return expected_topics;
 }

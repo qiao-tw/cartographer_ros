@@ -96,6 +96,7 @@ class SensorBridge {
   const TfBridge tf_bridge_;
   ::cartographer::mapping::TrajectoryBuilderInterface* const
       trajectory_builder_;
+  double gps_origin_[3];
 
   absl::optional<::cartographer::transform::Rigid3d> ecef_to_local_frame_;
 };
