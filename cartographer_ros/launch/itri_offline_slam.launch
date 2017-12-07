@@ -1,0 +1,20 @@
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <node name="cartographer_offline_node" pkg="cartographer_ros"
+      type="cartographer_offline_node" args="
+          -configuration_directory  $(find cartographer_ros)/configuration_files
+          -configuration_basename itri_slam.lua
+          -urdf_filename $(find cartographer_ros)/urdf/itri_van.urdf
+          -bag_filenames $(arg bag_filenames)"
+      output="screen">
+    <remap from="points2" to="/velodyne_points" />
+    <remap from="imu" to="/imu/data" />
+  </node>
+
+  <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+      type="cartographer_occupancy_grid_node" args="-resolution 0.1" />
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+      args="-d $(find cartographer_ros)/configuration_files/itri_slam.rviz" />
+</launch>
