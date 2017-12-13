@@ -37,6 +37,7 @@
 #include "cartographer_ros/sensor_bridge.h"
 #include "cartographer_ros/tf_bridge.h"
 #include "cartographer_ros/time_conversion.h"
+#include "cartographer_ros/utm.h"
 #include "cartographer_ros_msgs/StatusCode.h"
 #include "cartographer_ros_msgs/StatusResponse.h"
 #include "glog/logging.h"
@@ -146,6 +147,7 @@ Node::Node(
   wall_timers_.push_back(node_handle_.createWallTimer(
       ::ros::WallDuration(kConstraintPublishPeriodSec),
       &Node::PublishConstraintList, this));
+  gps_origin_[0] = gps_origin_[1] = gps_origin_[2] = std::nan("");
 }
 
 Node::~Node() { FinishAllTrajectories(); }
@@ -819,8 +821,24 @@ void Node::HandleGpsMessage(const int trajectory_id,
   if (!sensor_samplers_.at(trajectory_id).gps_sampler.Pulse()) {
     return;
   }
+  boost::shared_ptr<sensor_msgs::NavSatFix> msg2(
+        new sensor_msgs::NavSatFix(*msg));
+  // GPS origin should be global, not trajectory-specific
+  double x, y, z = msg->altitude;
+  ::gps_common::UTM(msg->latitude, msg->longitude, &x, &y);
+  if (std::isnan(gps_origin_[0])) {
+    LOG(INFO) << "Setting GPS origin to ("  << std::setprecision(15)
+              << x << "," << y << "," << z << ")";
+    gps_origin_[0] = x;
+    gps_origin_[1] = y;
+    gps_origin_[2] = z;
+  }
+  // HACK: use latitude and longitude to store metric x, y
+  msg2->latitude = x - gps_origin_[0];
+  msg2->longitude = y - gps_origin_[1];
+  msg2->altitude = z - gps_origin_[2];
   auto sensor_bridge_ptr = map_builder_bridge_.sensor_bridge(trajectory_id);
-  sensor_bridge_ptr->HandleGpsMessage(sensor_id, msg);
+  sensor_bridge_ptr->HandleGpsMessage(sensor_id, msg2);
 }
 
 void Node::MaybeWarnAboutTopicMismatch(

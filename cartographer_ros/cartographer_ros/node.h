@@ -225,6 +225,9 @@ class Node {
   // they do not fire.
   std::vector<::ros::WallTimer> wall_timers_;
 
+  // Center map on the first GPS observation.
+  double gps_origin_[3];
+
   // The timer for publishing local trajectory data (i.e. pose transforms and
   // range data point clouds) is a regular timer which is not triggered when
   // simulation time is standing still. This prevents overflowing the transform
