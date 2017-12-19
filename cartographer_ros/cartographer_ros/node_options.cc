@@ -44,6 +44,18 @@ NodeOptions CreateNodeOptions(
     options.use_pose_extrapolator =
         lua_parameter_dictionary->GetBool("use_pose_extrapolator");
   }
+  if (lua_parameter_dictionary->HasKey("gps_origin_latitude")) {
+    options.gps_origin[0] =
+        lua_parameter_dictionary->GetDouble("gps_origin_latitude");
+    options.gps_origin[1] =
+        lua_parameter_dictionary->GetDouble("gps_origin_longitude");
+    options.gps_origin[2] =
+        lua_parameter_dictionary->GetDouble("gps_origin_altitude");
+  } else {
+    options.gps_origin[0] =
+        options.gps_origin[1] =
+        options.gps_origin[2] = 0.;
+  }
   return options;
 }
 

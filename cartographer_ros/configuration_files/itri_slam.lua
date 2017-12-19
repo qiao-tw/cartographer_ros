@@ -37,6 +37,9 @@ options = {
   odometry_sampling_ratio = 1.,
   imu_sampling_ratio = 1.,
   gps_sampling_ratio = 0.04,
+  gps_origin_latitude = 24.7746887207031,
+  gps_origin_longitude = 121.046104431152,
+  gps_origin_altitude = 141.853973388672
 }
 
 TRAJECTORY_BUILDER_3D.num_accumulated_range_data = 1

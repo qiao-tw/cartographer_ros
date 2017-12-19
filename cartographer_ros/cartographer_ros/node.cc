@@ -147,7 +147,19 @@ Node::Node(
   wall_timers_.push_back(node_handle_.createWallTimer(
       ::ros::WallDuration(kConstraintPublishPeriodSec),
       &Node::PublishConstraintList, this));
-  gps_origin_[0] = gps_origin_[1] = gps_origin_[2] = std::nan("");
+
+  ::gps_common::UTM(node_options.gps_origin[0],
+      node_options.gps_origin[1],
+      &gps_origin_[0], &gps_origin_[1]);
+  gps_origin_[2] = node_options.gps_origin[2];
+  LOG(INFO) << "Setting GPS origin (lat,lon,alt) to ("  << std::setprecision(15)
+            << node_options.gps_origin[0] << ","
+            << node_options.gps_origin[1] << ","
+            << node_options.gps_origin[2] << ")";
+  LOG(INFO) << "Setting GPS origin (metric) to ("  << std::setprecision(15)
+            << gps_origin_[0] << ","
+            << gps_origin_[1] << ","
+            << gps_origin_[2] << ")";
 }
 
 Node::~Node() { FinishAllTrajectories(); }
@@ -826,13 +838,7 @@ void Node::HandleGpsMessage(const int trajectory_id,
   // GPS origin should be global, not trajectory-specific
   double x, y, z = msg->altitude;
   ::gps_common::UTM(msg->latitude, msg->longitude, &x, &y);
-  if (std::isnan(gps_origin_[0])) {
-    LOG(INFO) << "Setting GPS origin to ("  << std::setprecision(15)
-              << x << "," << y << "," << z << ")";
-    gps_origin_[0] = x;
-    gps_origin_[1] = y;
-    gps_origin_[2] = z;
-  }
+
   // HACK: use latitude and longitude to store metric x, y
   msg2->latitude = x - gps_origin_[0];
   msg2->longitude = y - gps_origin_[1];

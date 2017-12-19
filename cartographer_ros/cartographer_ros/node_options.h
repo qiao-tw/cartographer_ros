@@ -36,6 +36,7 @@ struct NodeOptions {
   double pose_publish_period_sec;
   double trajectory_publish_period_sec;
   bool use_pose_extrapolator = true;
+  double gps_origin[3];
 };
 
 NodeOptions CreateNodeOptions(
