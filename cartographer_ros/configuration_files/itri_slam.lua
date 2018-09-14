@@ -36,10 +36,10 @@ options = {
   rangefinder_sampling_ratio = 1.,
   odometry_sampling_ratio = 1.,
   imu_sampling_ratio = 1.,
-  gps_sampling_ratio = 0.04,
-  gps_origin_latitude = 24.7746887207031,
-  gps_origin_longitude = 121.046104431152,
-  gps_origin_altitude = 141.853973388672
+  gps_sampling_ratio = 0.5,
+  gps_origin_latitude = 24.7841819,
+  gps_origin_longitude = 120.9985068,
+  gps_origin_altitude = 129.074
 }
 
 TRAJECTORY_BUILDER_3D.num_accumulated_range_data = 1
@@ -47,9 +47,9 @@ TRAJECTORY_BUILDER_3D.min_range = 2.
 -- TRAJECTORY_BUILDER_3D.ceres_scan_matcher.only_optimize_yaw = true
 TRAJECTORY_BUILDER_3D.ceres_scan_matcher.translation_weight = 10.
 TRAJECTORY_BUILDER_3D.ceres_scan_matcher.rotation_weight = 100.
-TRAJECTORY_BUILDER_3D.submaps.high_resolution = 0.2
+TRAJECTORY_BUILDER_3D.submaps.high_resolution = 0.25
 TRAJECTORY_BUILDER_3D.submaps.high_resolution_max_range = 40.
-TRAJECTORY_BUILDER_3D.submaps.low_resolution = 0.8
+TRAJECTORY_BUILDER_3D.submaps.low_resolution = 1.0
 
 MAX_3D_RANGE = 80.
 
@@ -59,16 +59,16 @@ POSE_GRAPH.optimization_problem.huber_scale = 5e2
 POSE_GRAPH.optimize_every_n_nodes = 320
 
 -- "global" is over multiple trajectories
-POSE_GRAPH.global_sampling_ratio = 0.003 
+POSE_GRAPH.global_sampling_ratio = 0.1
 POSE_GRAPH.global_constraint_search_after_n_seconds = 10.
-POSE_GRAPH.constraint_builder.global_localization_min_score = 0.5
+POSE_GRAPH.constraint_builder.global_localization_min_score = 0.3
 
 -- "local" is within the same trajectory
-POSE_GRAPH.constraint_builder.sampling_ratio = 0.03
+POSE_GRAPH.constraint_builder.sampling_ratio = 0.3
 POSE_GRAPH.optimization_problem.ceres_solver_options.max_num_iterations = 10
-POSE_GRAPH.constraint_builder.min_score = 0.5 -- 0.62 -- for fast correlative scan matcher
+POSE_GRAPH.constraint_builder.min_score = 0.55 -- 0.62 -- for fast correlative scan matcher
 
-POSE_GRAPH.constraint_builder.max_constraint_distance = 20 -- for local constraints
+POSE_GRAPH.constraint_builder.max_constraint_distance = 100 -- for local constraints
 POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.linear_xy_search_window = 20.
 POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.linear_z_search_window = 20.
 POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.angular_search_window = math.rad(20.)
@@ -78,7 +78,7 @@ POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.min_low_resolutio
 
 POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_weight = 100
 POSE_GRAPH.optimization_problem.fixed_frame_pose_rotation_weight = 0
-POSE_GRAPH.optimization_problem.fixed_frame_pose_per_n_nodes = 100
+POSE_GRAPH.optimization_problem.fixed_frame_pose_per_n_nodes = 30
 POSE_GRAPH.optimization_problem.log_solver_summary = true
 
 return options
