@@ -176,20 +176,17 @@ SensorBridge::ToGpsData(
   ::cartographer::transform::Rigid3d utm_pose(
         ::cartographer::transform::Rigid3d::Vector(x, y, z),
         ::cartographer::transform::Rigid3d::Quaternion(1, 0, 0, 0));
-  return ::cartographer::common::make_unique<
-      ::cartographer::sensor::FixedFramePoseData>(
-      ::cartographer::sensor::FixedFramePoseData{
-          time, utm_pose});
+  return absl::make_unique<::cartographer::sensor::FixedFramePoseData>(
+      ::cartographer::sensor::FixedFramePoseData{time, utm_pose});
 }
 
 void SensorBridge::HandleGpsMessage(
-    const std::string& sensor_id,
-    const sensor_msgs::NavSatFix::ConstPtr& msg) {
-  std::unique_ptr<::cartographer::sensor::FixedFramePoseData> gps_data =
-      ToGpsData(msg);
+    const std::string& sensor_id, const sensor_msgs::NavSatFix::ConstPtr& msg) {
+  std::unique_ptr<::cartographer::sensor::FixedFramePoseData> gps_data = ToGpsData(msg);
   if (gps_data != nullptr) {
-    trajectory_builder_->AddFixedFramePoseData(sensor_id, gps_data->time,
-                                               gps_data->pose);
+    trajectory_builder_->AddSensorData(
+          sensor_id, carto::sensor::FixedFramePoseData{
+            gps_data->time, absl::optional<Rigid3d>(gps_data->pose)});
   }
 }
 

@@ -366,7 +366,8 @@ Node::ComputeExpectedSensorIds(
     expected_topics.insert(SensorId{SensorType::LANDMARK, kLandmarkTopic});
   }
   if (options.use_gps) {
-    expected_topics.insert(SsensorId{SensorType::FIXED_FRAME_POSE, topics.gps_topic});
+    expected_topics.insert(
+        SensorId{SensorType::FIXED_FRAME_POSE, topics.gps_topic});
   }
   return expected_topics;
 }
@@ -455,6 +456,7 @@ void Node::LaunchSubscribers(const TrajectoryOptions& options,
              &Node::HandleLandmarkMessage, trajectory_id, topic, &node_handle_,
              this),
          topic});
+  }
   if (options.use_gps) {
     std::string topic = topics.gps_topic;
     subscribers_[trajectory_id].push_back(
@@ -829,7 +831,7 @@ void Node::LoadState(const std::string& state_filename,
 void Node::HandleGpsMessage(const int trajectory_id,
                             const std::string& sensor_id,
                             const sensor_msgs::NavSatFix::ConstPtr& msg) {
-  absl::MutexLocker lock(&mutex_);
+  absl::MutexLock lock(&mutex_);
   if (!sensor_samplers_.at(trajectory_id).gps_sampler.Pulse()) {
     return;
   }
