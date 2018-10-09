@@ -140,6 +140,14 @@ int MapBuilderBridge::AddTrajectory(
       trajectory_options.tracking_frame,
       node_options_.lookup_transform_timeout_sec, tf_buffer_,
       map_builder_->GetTrajectoryBuilder(trajectory_id));
+
+  // qiao@2018.10.17: apply unique ecef-to-local_frame transform
+  if (trajectory_options.unique_ecef_to_local_frame) {
+    if (global_ecef_to_local_frame_.has_value()) { // NOT 1st trajectory
+      sensor_bridges_[trajectory_id]->ApplyEcefToLocalFrame(global_ecef_to_local_frame_.value());
+    }
+  }
+
   auto emplace_result =
       trajectory_options_.emplace(trajectory_id, trajectory_options);
   CHECK(emplace_result.second == true);
@@ -152,6 +160,13 @@ void MapBuilderBridge::FinishTrajectory(const int trajectory_id) {
   // Make sure there is a trajectory with 'trajectory_id'.
   CHECK(GetTrajectoryStates().count(trajectory_id));
   map_builder_->FinishTrajectory(trajectory_id);
+
+  // qiao@2018.10.17: apply unique ecef-to-local_frame transform
+  if (trajectory_options_[trajectory_id].unique_ecef_to_local_frame) {
+    if (!global_ecef_to_local_frame_.has_value()) {
+      global_ecef_to_local_frame_ = sensor_bridges_[trajectory_id]->EcefToLocalFrame();
+    }
+  }
   sensor_bridges_.erase(trajectory_id);
 }
 

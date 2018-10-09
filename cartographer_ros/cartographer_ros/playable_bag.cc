@@ -17,6 +17,7 @@
 #include "cartographer_ros/playable_bag.h"
 
 #include "absl/memory/memory.h"
+#include "cartographer/common/utils.h"
 #include "cartographer_ros/node_constants.h"
 #include "glog/logging.h"
 #include "tf2_msgs/TFMessage.h"
@@ -57,6 +58,7 @@ std::tuple<ros::Time, ros::Time> PlayableBag::GetBeginEndTime() const {
 
 rosbag::MessageInstance PlayableBag::GetNextMessage(
     cartographer_ros_msgs::BagfileProgress* progress) {
+  FUNC_STAT_BEGIN
   CHECK(IsMessageAvailable());
   const rosbag::MessageInstance msg = buffered_messages_.front();
   buffered_messages_.pop_front();
@@ -76,6 +78,7 @@ rosbag::MessageInstance PlayableBag::GetNextMessage(
     progress->processed_seconds = processed_seconds;
   }
 
+  FUNC_STAT_END
   return msg;
 }
 
@@ -103,12 +106,14 @@ void PlayableBag::AdvanceOneMessage() {
 }
 
 void PlayableBag::AdvanceUntilMessageAvailable() {
+  //FUNC_STAT_BEGIN
   if (finished_) {
     return;
   }
   do {
     AdvanceOneMessage();
   } while (!finished_ && !IsMessageAvailable());
+  //FUNC_STAT_END
 }
 
 PlayableBagMultiplexer::PlayableBagMultiplexer() : pnh_("~") {
@@ -134,27 +139,38 @@ bool PlayableBagMultiplexer::IsMessageAvailable() const {
 }
 
 std::tuple<rosbag::MessageInstance, int, bool>
-PlayableBagMultiplexer::GetNextMessage() {
+PlayableBagMultiplexer::GetNextMessage(const bool publish_progress) {
   CHECK(IsMessageAvailable());
   const int current_bag_index = next_message_queue_.top().bag_index;
   PlayableBag& current_bag = playable_bags_.at(current_bag_index);
-  cartographer_ros_msgs::BagfileProgress progress;
-  rosbag::MessageInstance msg = current_bag.GetNextMessage(&progress);
-  if (ros::Time::now() - bag_progress_time_map_[current_bag.bag_id()] >=
-          ros::Duration(progress_pub_interval_) &&
-      bag_progress_pub_.getNumSubscribers() > 0) {
-    progress.total_bagfiles = playable_bags_.size();
-    bag_progress_pub_.publish(progress);
-    bag_progress_time_map_[current_bag.bag_id()] = ros::Time::now();
+  if (publish_progress  && bag_progress_pub_.getNumSubscribers() > 0) {
+    cartographer_ros_msgs::BagfileProgress progress;
+    rosbag::MessageInstance msg = current_bag.GetNextMessage(&progress);
+    if (ros::Time::now() - bag_progress_time_map_[current_bag.bag_id()] >=
+            ros::Duration(progress_pub_interval_)) {
+      progress.total_bagfiles = playable_bags_.size();
+      bag_progress_pub_.publish(progress);
+      bag_progress_time_map_[current_bag.bag_id()] = ros::Time::now();
+    }
+    CHECK_EQ(msg.getTime(), next_message_queue_.top().message_timestamp);
+    next_message_queue_.pop();
+    if (current_bag.IsMessageAvailable()) {
+      next_message_queue_.emplace(
+          BagMessageItem{current_bag.PeekMessageTime(), current_bag_index});
+    }
+    return std::make_tuple(std::move(msg), current_bag.bag_id(),
+                           !current_bag.IsMessageAvailable());
+  } else {
+    rosbag::MessageInstance msg = current_bag.GetNextMessage(NULL);
+    CHECK_EQ(msg.getTime(), next_message_queue_.top().message_timestamp);
+    next_message_queue_.pop();
+    if (current_bag.IsMessageAvailable()) {
+      next_message_queue_.emplace(
+          BagMessageItem{current_bag.PeekMessageTime(), current_bag_index});
+    }
+    return std::make_tuple(std::move(msg), current_bag.bag_id(),
+                           !current_bag.IsMessageAvailable());
   }
-  CHECK_EQ(msg.getTime(), next_message_queue_.top().message_timestamp);
-  next_message_queue_.pop();
-  if (current_bag.IsMessageAvailable()) {
-    next_message_queue_.emplace(
-        BagMessageItem{current_bag.PeekMessageTime(), current_bag_index});
-  }
-  return std::make_tuple(std::move(msg), current_bag.bag_id(),
-                         !current_bag.IsMessageAvailable());
 }
 
 ros::Time PlayableBagMultiplexer::PeekMessageTime() const {

@@ -23,6 +23,7 @@
 #include <chrono>
 
 #include "absl/strings/str_split.h"
+#include "cartographer/common/utils.h"
 #include "cartographer_ros/node.h"
 #include "cartographer_ros/playable_bag.h"
 #include "cartographer_ros/urdf_reader.h"
@@ -66,6 +67,8 @@ DEFINE_bool(keep_running, false,
 DEFINE_double(skip_seconds, 0,
               "Optional amount of seconds to skip from the beginning "
               "(i.e. when the earliest bag starts.). ");
+DEFINE_bool(publish_progress, false,
+            "Publish mapping progress");
 
 namespace cartographer_ros {
 
@@ -271,7 +274,10 @@ void RunOfflineNode(const MapBuilderFactory& map_builder_factory) {
       return;
     }
 
-    const auto next_msg_tuple = playable_bag_multiplexer.GetNextMessage();
+    auto next_msg_tuple =
+        FLAGS_publish_progress?
+          playable_bag_multiplexer.GetNextMessage(true) :
+          playable_bag_multiplexer.GetNextMessage(false);
     const rosbag::MessageInstance& msg = std::get<0>(next_msg_tuple);
     const int bag_index = std::get<1>(next_msg_tuple);
     const bool is_last_message_in_bag = std::get<2>(next_msg_tuple);
@@ -342,6 +348,7 @@ void RunOfflineNode(const MapBuilderFactory& map_builder_factory) {
     if (is_last_message_in_bag) {
       node.FinishTrajectory(trajectory_id);
     }
+
   }
 
   // Ensure the clock is republished after the bag has been finished, during the

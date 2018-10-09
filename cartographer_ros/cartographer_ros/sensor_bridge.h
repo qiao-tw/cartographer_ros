@@ -74,6 +74,11 @@ class SensorBridge {
 
   const TfBridge& tf_bridge() const;
 
+  ::cartographer::transform::Rigid3d EcefToLocalFrame() {
+    return ecef_to_local_frame_.value();
+  }
+  void ApplyEcefToLocalFrame(const ::cartographer::transform::Rigid3d& ecef_to_local);
+
  private:
   void HandleLaserScan(
       const std::string& sensor_id, ::cartographer::common::Time start_time,

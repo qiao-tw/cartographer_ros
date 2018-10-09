@@ -229,4 +229,8 @@ void SensorBridge::HandleRangefinder(
   }
 }
 
+void SensorBridge::ApplyEcefToLocalFrame(const ::cartographer::transform::Rigid3d& ecef_to_local) {
+  ecef_to_local_frame_ = ecef_to_local;
+}
+
 }  // namespace cartographer_ros

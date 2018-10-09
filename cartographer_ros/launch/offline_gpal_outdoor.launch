@@ -23,6 +23,7 @@
   <arg name="urdf_filenames" default="$(find cartographer_ros)/urdf/gpal.urdf"/>
 
   <remap from="points2" to="velodyne_points" />
+  <remap from="points2" to="points_raw" />
   <remap from="imu" to="/imu/data" />
   <include file="$(find cartographer_ros)/launch/offline_node.launch">
     <arg name="bag_filenames" value="$(arg bag_filenames)"/>

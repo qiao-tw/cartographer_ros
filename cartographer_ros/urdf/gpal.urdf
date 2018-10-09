@@ -23,7 +23,7 @@
     </visual>
   </link>
 
-  <link name="base_imu">
+  <link name="imu">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
@@ -43,7 +43,7 @@
 
   <joint name="imu_mount_to_imu" type="fixed">
     <parent link="tracking_imu"/>
-    <child link="base_imu"/>
+    <child link="imu"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
 
