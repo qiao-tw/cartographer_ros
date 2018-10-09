@@ -46,6 +46,7 @@ struct TrajectoryOptions {
   double fixed_frame_pose_sampling_ratio;
   double imu_sampling_ratio;
   double landmarks_sampling_ratio;
+  bool unique_ecef_to_local_frame;
 };
 
 ::cartographer::mapping::proto::InitialTrajectoryPose

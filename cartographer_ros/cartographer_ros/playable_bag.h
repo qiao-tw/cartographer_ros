@@ -76,7 +76,7 @@ class PlayableBagMultiplexer {
   // this was the last message in that bag.
   std::tuple<rosbag::MessageInstance, int /* bag_id */,
              bool /* is_last_message_in_bag */>
-  GetNextMessage();
+  GetNextMessage(const bool publish_progress);
 
   bool IsMessageAvailable() const;
   ros::Time PeekMessageTime() const;

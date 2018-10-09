@@ -76,6 +76,8 @@ TrajectoryOptions CreateTrajectoryOptions(
       lua_parameter_dictionary->GetDouble("imu_sampling_ratio");
   options.landmarks_sampling_ratio =
       lua_parameter_dictionary->GetDouble("landmarks_sampling_ratio");
+  options.unique_ecef_to_local_frame =
+      lua_parameter_dictionary->GetBool("unique_ecef_to_local_frame");
   CheckTrajectoryOptions(options);
   return options;
 }

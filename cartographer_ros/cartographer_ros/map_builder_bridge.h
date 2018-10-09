@@ -112,6 +112,8 @@ class MapBuilderBridge {
   std::unordered_map<int, TrajectoryOptions> trajectory_options_;
   std::unordered_map<int, std::unique_ptr<SensorBridge>> sensor_bridges_;
   std::unordered_map<int, size_t> trajectory_to_highest_marker_id_;
+
+  absl::optional<::cartographer::transform::Rigid3d> global_ecef_to_local_frame_;
 };
 
 }  // namespace cartographer_ros
