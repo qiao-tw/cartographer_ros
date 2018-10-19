@@ -31,7 +31,7 @@ using ::cartographer::transform::Rigid3d;
 
 constexpr double kTrajectoryLineStripMarkerScale = 0.07;
 constexpr double kLandmarkMarkerScale = 0.3;
-constexpr double kConstraintMarkerScale = 0.025;
+constexpr double kConstraintMarkerScale = 0.1;
 
 ::std_msgs::ColorRGBA ToMessage(const cartographer::io::FloatColor& color) {
   ::std_msgs::ColorRGBA result;
@@ -143,8 +143,9 @@ int MapBuilderBridge::AddTrajectory(
 
   // qiao@2018.10.17: apply unique ecef-to-local_frame transform
   if (trajectory_options.unique_ecef_to_local_frame) {
-    if (global_ecef_to_local_frame_.has_value()) { // NOT 1st trajectory
-      sensor_bridges_[trajectory_id]->ApplyEcefToLocalFrame(global_ecef_to_local_frame_.value());
+    if (global_ecef_to_local_frame_.has_value()) {  // NOT 1st trajectory
+      sensor_bridges_[trajectory_id]->ApplyEcefToLocalFrame(
+          global_ecef_to_local_frame_.value());
     }
   }
 
@@ -164,7 +165,8 @@ void MapBuilderBridge::FinishTrajectory(const int trajectory_id) {
   // qiao@2018.10.17: apply unique ecef-to-local_frame transform
   if (trajectory_options_[trajectory_id].unique_ecef_to_local_frame) {
     if (!global_ecef_to_local_frame_.has_value()) {
-      global_ecef_to_local_frame_ = sensor_bridges_[trajectory_id]->EcefToLocalFrame();
+      global_ecef_to_local_frame_ =
+          sensor_bridges_[trajectory_id]->EcefToLocalFrame();
     }
   }
   sensor_bridges_.erase(trajectory_id);
