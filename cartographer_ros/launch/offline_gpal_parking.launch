@@ -19,7 +19,7 @@
   <arg name="no_rviz" default="false"/>
   <arg name="rviz_config" default="$(find cartographer_ros)/configuration_files/gpal.rviz"/>
   <arg name="configuration_directory" default="$(find cartographer_ros)/configuration_files"/>
-  <arg name="configuration_basenames" default="gpal_outdoor.lua"/>
+  <arg name="configuration_basenames" default="gpal_parking.lua"/>
   <arg name="urdf_filenames" default="$(find cartographer_ros)/urdf/gpal.urdf"/>
   <arg name="launch_prefix" default=""/>
 
