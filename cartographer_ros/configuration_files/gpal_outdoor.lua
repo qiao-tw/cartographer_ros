@@ -64,7 +64,7 @@ TRAJECTORY_BUILDER_3D.submaps.high_resolution_max_range = 40.
 TRAJECTORY_BUILDER_3D.submaps.low_resolution = 2.0
 TRAJECTORY_BUILDER_3D.submaps.num_range_data = 160
 TRAJECTORY_BUILDER_3D.submaps.range_data_inserter.hit_probability = 0.9
-TRAJECTORY_BUILDER_3D.submaps.range_data_inserter.miss_probability = 0.1
+TRAJECTORY_BUILDER_3D.submaps.range_data_inserter.miss_probability = 0.45
 TRAJECTORY_BUILDER_3D.submaps.range_data_inserter.num_free_space_voxels = 0
 TRAJECTORY_BUILDER_3D.use_online_correlative_scan_matching = false -- true -- enable it will make SLAM terribly slow
 
@@ -72,23 +72,23 @@ MAP_BUILDER.use_trajectory_builder_3d = true
 MAP_BUILDER.num_background_threads = 14
 
 POSE_GRAPH.optimize_every_n_nodes = 64 -- turn off global SLAM to not mess with tuning
-POSE_GRAPH.global_sampling_ratio = 0.01
+POSE_GRAPH.global_sampling_ratio = 0
 POSE_GRAPH.log_residual_histograms = false
 POSE_GRAPH.matcher_translation_weight = 1e3
 POSE_GRAPH.matcher_rotation_weight = 1e3
 POSE_GRAPH.optimization_problem.huber_scale = 5e2
 POSE_GRAPH.optimization_problem.ceres_solver_options.max_num_iterations = 50
 POSE_GRAPH.optimization_problem.fixed_frame_constraint_to_submap = false
-POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_xy_weight = 10
-POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_z_weight = 1
+POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_xy_weight = 1000
+POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_z_weight = 100
 POSE_GRAPH.optimization_problem.fixed_frame_pose_rotation_yaw_weight = 0
 POSE_GRAPH.optimization_problem.fixed_frame_pose_rotation_roll_pitch_weight = 0
-POSE_GRAPH.optimization_problem.log_solver_summary = true
-POSE_GRAPH.global_constraint_search_after_n_seconds = 10
+POSE_GRAPH.optimization_problem.log_solver_summary = false
+POSE_GRAPH.global_constraint_search_after_n_seconds = 0
 
 POSE_GRAPH.constraint_builder.log_matches = true
 
-POSE_GRAPH.constraint_builder.sampling_ratio = 0.03 -- the lower, the faster
+POSE_GRAPH.constraint_builder.sampling_ratio = 0 -- the lower, the faster
 POSE_GRAPH.constraint_builder.global_localization_min_score = 0.4 -- 0.66
 POSE_GRAPH.constraint_builder.min_score = 0.3 -- 0.5 -- for fast correlative scan matcher, fast, rough
 -- POSE_GRAPH.constraint_builder.min_score = 0.4
