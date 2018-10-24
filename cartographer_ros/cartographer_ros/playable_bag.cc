@@ -64,11 +64,12 @@ rosbag::MessageInstance PlayableBag::GetNextMessage(
   buffered_messages_.pop_front();
   AdvanceUntilMessageAvailable();
   double processed_seconds = (msg.getTime() - view_->getBeginTime()).toSec();
+#if 0 // qiao@2018.10.23: too lousy
   if ((message_counter_ % 10000) == 0) {
     LOG(INFO) << "Processed " << processed_seconds << " of "
               << duration_in_seconds_ << " seconds of bag " << bag_filename_;
   }
-
+#endif
   if (progress) {
     progress->current_bagfile_name = bag_filename_;
     progress->current_bagfile_id = bag_id_;
