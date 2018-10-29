@@ -59,7 +59,7 @@ TRAJECTORY_BUILDER_3D.num_accumulated_range_data = 1 -- we got 360 degree view, 
 TRAJECTORY_BUILDER_3D.min_range = 2.
 TRAJECTORY_BUILDER_3D.max_range = MAX_3D_RANGE
 TRAJECTORY_BUILDER_3D.imu_gravity_time_constant = 9.8
-TRAJECTORY_BUILDER_3D.submaps.high_resolution = 0.5 -- 0.5 -- fast, rough
+TRAJECTORY_BUILDER_3D.submaps.high_resolution = 0.4 -- 0.5 -- fast, rough
 TRAJECTORY_BUILDER_3D.submaps.high_resolution_max_range = 40.
 TRAJECTORY_BUILDER_3D.submaps.low_resolution = 1.0 -- 0.2
 TRAJECTORY_BUILDER_3D.submaps.num_range_data = 60 -- default(160)
@@ -68,8 +68,8 @@ TRAJECTORY_BUILDER_3D.submaps.range_data_inserter.miss_probability = 0.49
 TRAJECTORY_BUILDER_3D.submaps.range_data_inserter.num_free_space_voxels = 0
 TRAJECTORY_BUILDER_3D.use_online_correlative_scan_matching = false -- true -- enable it will make SLAM terribly slow
 
-TRAJECTORY_BUILDER_3D.ceres_scan_matcher.occupied_space_weight_0 = 1. -- 1e2 -- default(1.)
-TRAJECTORY_BUILDER_3D.ceres_scan_matcher.occupied_space_weight_1 = 6. -- 1e2 -- default(6.)
+TRAJECTORY_BUILDER_3D.ceres_scan_matcher.occupied_space_weight_0 = 1e2 -- default(1.)
+TRAJECTORY_BUILDER_3D.ceres_scan_matcher.occupied_space_weight_1 = 1e2 -- default(6.)
 TRAJECTORY_BUILDER_3D.ceres_scan_matcher.translation_weight = 5. -- default(5.)
 TRAJECTORY_BUILDER_3D.ceres_scan_matcher.rotation_weight = 4e1 -- default(4e2)
 TRAJECTORY_BUILDER_3D.ceres_scan_matcher.only_optimize_yaw = false
@@ -85,14 +85,14 @@ POSE_GRAPH.optimization_problem.ceres_solver_options.max_num_iterations = 50
 
 -- GPS (fixed frame pose)
 POSE_GRAPH.optimization_problem.fixed_frame_constraint_to_submap = false
-POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_xy_weight = 5e1 -- 1
-POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_z_weight = 1e2 -- 1
+POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_xy_weight = 5e2 -- 1
+POSE_GRAPH.optimization_problem.fixed_frame_pose_translation_z_weight = 1e3 -- 1
 POSE_GRAPH.optimization_problem.fixed_frame_pose_rotation_yaw_weight = 0
 POSE_GRAPH.optimization_problem.fixed_frame_pose_rotation_roll_pitch_weight = 0
 
 -- constraints based on IMU observations of angular velocities and linear acceleration.
 POSE_GRAPH.optimization_problem.huber_scale = 1e1 -- default(1e1)
-POSE_GRAPH.optimization_problem.acceleration_weight = 1e2 -- 1e3 -- default(1e3)
+POSE_GRAPH.optimization_problem.acceleration_weight = 2e1 -- 1e3 -- default(1e3)
 POSE_GRAPH.optimization_problem.rotation_weight = 3e5 -- default(3e5)
 
 -- intra- and inter-submap constraints
@@ -104,21 +104,21 @@ POSE_GRAPH.constraint_builder.max_constraint_z_distance = 30
 POSE_GRAPH.constraint_builder.max_constraint_angular_search_window = math.rad(30.)
 -- intra-submap
 POSE_GRAPH.matcher_translation_weight = 5e5 -- default(1e3)
-POSE_GRAPH.matcher_rotation_weight = 5e3 -- default(1e3)
+POSE_GRAPH.matcher_rotation_weight = 5e4 -- default(1e3)
 -- inter-submap
 POSE_GRAPH.constraint_builder.loop_closure_translation_weight = 1e9 -- default(1.1e4)
 POSE_GRAPH.constraint_builder.loop_closure_rotation_weight = 1e10 -- default(1e5)
 
 POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.occupied_space_weight_0 = 1e5 -- default(5.)
-POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.occupied_space_weight_1 = 2e5 -- default(30.)
-POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.translation_weight = 100.
+POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.occupied_space_weight_1 = 3e5 -- default(30.)
+POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.translation_weight = 1e4
 POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.rotation_weight = 100. -- 10.
 POSE_GRAPH.constraint_builder.ceres_scan_matcher_3d.only_optimize_yaw = false
 
 POSE_GRAPH.constraint_builder.global_localization_min_score = 0.3 -- 0.66
-POSE_GRAPH.constraint_builder.min_score = 0.55 -- for fast correlative scan matcher, fast, rough
-POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.min_rotational_score = 0.80
-POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.min_low_resolution_score = 0.45
+POSE_GRAPH.constraint_builder.min_score = 0.72 -- for fast correlative scan matcher, fast, rough
+POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.min_rotational_score = 0.9
+POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.min_low_resolution_score = 0.58
 POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.linear_xy_search_window = 50.
 POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.linear_z_search_window = 50.
 POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.angular_search_window = math.rad(30.)
