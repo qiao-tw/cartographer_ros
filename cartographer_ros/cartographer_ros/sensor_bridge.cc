@@ -75,6 +75,11 @@ void SensorBridge::HandleOdometryMessage(
 void SensorBridge::HandleNavSatFixMessage(
     const std::string& sensor_id, const sensor_msgs::NavSatFix::ConstPtr& msg) {
   const carto::common::Time time = FromRos(msg->header.stamp);
+  if (msg->status.service == 0) {
+    // LOG(WARNING) << "Invalid .service field, dropping NavSatFix message";
+    return;
+  }
+
   if (msg->status.status == sensor_msgs::NavSatStatus::STATUS_NO_FIX) {
     trajectory_builder_->AddSensorData(
         sensor_id,
